@@ -1,14 +1,14 @@
 # VALL-E X: Multilingual Text-to-Speech Synthesis and Voice Cloning 🔊
 [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/qCBRmAnTxg)
 <br>
-English | [中文](README-ZH.md)
-<br>
 An open source implementation of Microsoft's [VALL-E X](https://arxiv.org/pdf/2303.03926) zero-shot TTS model.<br>
 **We release our trained model to the public for research or application usage.**
 
 ![vallex-framework](/images/vallex_framework.jpg "VALL-E X framework")
 
-VALL-E X is an amazing multilingual text-to-speech (TTS) model proposed by Microsoft. While Microsoft initially publish in their research paper, they did not release any code or pretrained models. Recognizing the potential and value of this technology, our team took on the challenge to reproduce the results and train our own model. We are glad to share our trained VALL-E X model with the community, allowing everyone to experience the power next-generation TTS! 🎧
+## ⭐️ Welcome to VALL-E X! ⭐️
+
+VALL-E X is an amazing multilingual text-to-speech (TTS) model inspired by Microsoft's groundbreaking research. While Microsoft initially proposed the concept in their research paper, they did not release any code or pretrained models. Recognizing the potential and value of this technology, our team took on the challenge to reproduce the results and train our own model. We are excited to share our trained VALL-E X model with the community, allowing everyone to experience the power of personalized speech synthesis and voice cloning! 🎧
 <br>
 <br>
 More details about the model are presented in [model card](./model-card.md).
@@ -23,21 +23,18 @@ More details about the model are presented in [model card](./model-card.md).
 * [🧠 TODO](#-todo)
 
 ## 🚀 Updates
-**2023.08.23**
-- Added long text generation.
-
-**2023.08.20**
-- Added [Chinese README](README-ZH.md).
 
 **2023.08.14**
 - Pretrained VALL-E X checkpoint is now released. Download it [here](https://drive.google.com/file/d/10gdQWvP-K_e1undkvv0p2b7SU6I4Egyl/view?usp=sharing)
 
 ## 💻 Installation
-### Install with pip, recommended with Python 3.10, CUDA 11.7 ~ 12.0, PyTorch 2.0+
+### Install with pip and [conda](https://www.anaconda.com/download)
 ```commandline
-git clone https://github.com/Plachtaa/VALL-E-X.git
+conda create -n vallex python=3.10
+conda activate vallex
+git clone https://github.com/justinjohn0306/VALL-E-X.git
 cd VALL-E-X
-pip install --no-error-on-external -r requirements.txt
+pip install -r requirements.txt
 ```
 ### ❗❗❗ Special Notes ❗❗❗
 Japanese g2p tool `pyopenjtalk` may fail to build during installation, you may ignore it if you don't require Japanese TTS functionality.
@@ -294,9 +291,9 @@ to ensure acceptable performance.
 #### MORE TO BE ADDED...
 
 ## 🧠 TODO
-- [x] Add Chinese README
+- [ ] Add Chinese README
 - [ ] `.bat` scripts for non-python users
-- [x] Long text generation
+- [ ] Long text generation
 - [ ] Fine-tuning for better voice adaptation
 - [ ] Replace Encodec decoder with Vocos decoder
 - [ ] To be added...
