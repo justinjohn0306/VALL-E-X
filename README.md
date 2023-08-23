@@ -33,11 +33,13 @@ More details about the model are presented in [model card](./model-card.md).
 - Pretrained VALL-E X checkpoint is now released. Download it [here](https://drive.google.com/file/d/10gdQWvP-K_e1undkvv0p2b7SU6I4Egyl/view?usp=sharing)
 
 ## 💻 Installation
-### Install with pip, recommended with Python 3.10, CUDA 11.7 ~ 12.0, PyTorch 2.0+
+### Install with pip and [conda](https://www.anaconda.com/download)
 ```commandline
-git clone https://github.com/Plachtaa/VALL-E-X.git
+conda create -n vallex python=3.10
+conda activate vallex
+git clone https://github.com/justinjohn0306/VALL-E-X.git
 cd VALL-E-X
-pip install --no-error-on-external -r requirements.txt
+pip install -r requirements.txt
 ```
 ### ❗❗❗ Special Notes ❗❗❗
 Japanese g2p tool `pyopenjtalk` may fail to build during installation, you may ignore it if you don't require Japanese TTS functionality.
