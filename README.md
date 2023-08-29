@@ -41,9 +41,9 @@ git clone https://github.com/justinjohn0306/VALL-E-X.git
 cd VALL-E-X
 pip install -r requirements.txt
 ```
-### ❗❗❗ Special Notes ❗❗❗
-Japanese g2p tool `pyopenjtalk` may fail to build during installation, you may ignore it if you don't require Japanese TTS functionality.
-We are currently searching for more stable substitution.
+
+> Note: If you want to make prompt, you need to install ffmpeg and add its folder to the environment variable PATH.
+
 ##  🎧 Demos
 Not ready to set up the environment on your local machine just yet? No problem! We've got you covered with our online demos. You can try out VALL-E X directly on Hugging Face or Google Colab, experiencing the model's capabilities hassle-free!
 <br>
@@ -283,6 +283,7 @@ Comparing to [Bark](https://github.com/suno-ai/bark):
 
 #### Where can I download the model checkpoint?
 * We use `gdown` to download the model to directory `./checkpoints/` when you run `preload_models()` for the first time.
+* If you cannot access Google, please manually download from [this link](https://huggingface.co/Plachta/VALL-E-X/resolve/main/vallex-checkpoint.pt), and put the file under directory `./checkpoints/`.
 
 #### How much VRAM do I need?
 * 6GB GPU VRAM - Almost all NVIDIA GPUs satisfy the requirement.

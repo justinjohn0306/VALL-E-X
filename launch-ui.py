@@ -5,16 +5,20 @@ import pathlib
 import time
 import tempfile
 import platform
+import webbrowser
 if platform.system().lower() == 'windows':
     temp = pathlib.PosixPath
     pathlib.PosixPath = pathlib.WindowsPath
-elif platform.system().lower() == 'linux':
+else:
     temp = pathlib.WindowsPath
     pathlib.WindowsPath = pathlib.PosixPath
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 import langid
 langid.set_languages(['en', 'zh', 'ja'])
+
+import nltk
+nltk.data.path = nltk.data.path + [os.path.join(os.getcwd(), "nltk_data")]
 
 import torch
 import torchaudio
@@ -31,6 +35,7 @@ from models.vallex import VALLE
 from utils.g2p import PhonemeBpeTokenizer
 from descriptions import *
 from macros import *
+from examples import *
 
 import gradio as gr
 import whisper
@@ -57,7 +62,14 @@ if torch.cuda.is_available():
 if not os.path.exists("./checkpoints/"): os.mkdir("./checkpoints/")
 if not os.path.exists(os.path.join("./checkpoints/", "vallex-checkpoint.pt")):
     import gdown
-    gdown.download(id="10gdQWvP-K_e1undkvv0p2b7SU6I4Egyl", output=os.path.join("./checkpoints/", "vallex-checkpoint.pt"), quiet=False)
+    try:
+        gdown.download(id="10gdQWvP-K_e1undkvv0p2b7SU6I4Egyl", output=os.path.join("./checkpoints/", "vallex-checkpoint.pt"), quiet=False)
+    except Exception as e:
+        print(e)
+        raise Exception(
+            "\nModel weights download failed, please go to 'https://huggingface.co/Plachta/VALL-E-X/resolve/main/vallex-checkpoint.pt'"
+            "\ndownload model weights and put it to {} .".format(os.getcwd() + "\checkpoints"))
+
 model = VALLE(
         N_DIM,
         NUM_HEAD,
@@ -81,7 +93,8 @@ model.eval()
 audio_tokenizer = AudioTokenizer(device)
 
 # ASR
-whisper_model = whisper.load_model("medium").cpu()
+if not os.path.exists("./whisper/"): os.mkdir("./whisper/")
+whisper_model = whisper.load_model("medium",download_root=os.path.join(os.getcwd(), "whisper")).cpu()
 
 # Voice Presets
 preset_list = os.walk("./presets/").__next__()[2]
@@ -134,7 +147,7 @@ def make_npz_prompt(name, uploaded_audio, recorded_audio, transcript_content):
     if wav_pr.abs().max() > 1:
         wav_pr /= wav_pr.abs().max()
     if wav_pr.size(-1) == 2:
-        wav_pr = wav_pr.mean(-1, keepdim=False)
+        wav_pr = wav_pr[:, 0]
     if wav_pr.ndim == 1:
         wav_pr = wav_pr.unsqueeze(0)
     assert wav_pr.ndim and wav_pr.size(0) == 1
@@ -197,13 +210,12 @@ def infer_from_audio(text, language, accent, audio_prompt, record_audio_prompt, 
     model.to(device)
     audio_prompt = audio_prompt if audio_prompt is not None else record_audio_prompt
     sr, wav_pr = audio_prompt
-    sr, wav_pr = audio_prompt
     if not isinstance(wav_pr, torch.FloatTensor):
         wav_pr = torch.FloatTensor(wav_pr)
     if wav_pr.abs().max() > 1:
         wav_pr /= wav_pr.abs().max()
     if wav_pr.size(-1) == 2:
-        wav_pr = wav_pr.mean(-1, keepdim=False)
+        wav_pr = wav_pr[:, 0]
     if wav_pr.ndim == 1:
         wav_pr = wav_pr.unsqueeze(0)
     assert wav_pr.ndim and wav_pr.size(0) == 1
@@ -476,7 +488,7 @@ def main():
                     textbox = gr.TextArea(label="Text",
                                           placeholder="Type your sentence here",
                                           value="Welcome back, Master. What can I do for you today?", elem_id=f"tts-input")
-                    language_dropdown = gr.Dropdown(choices=['auto-detect', 'English', '中文', '日本語'], value='English', label='auto-detect')
+                    language_dropdown = gr.Dropdown(choices=['auto-detect', 'English', '中文', '日本語'], value='auto-detect', label='auto-detect')
                     accent_dropdown = gr.Dropdown(choices=['no-accent', 'English', '中文', '日本語'], value='no-accent', label='accent')
                     textbox_transcript = gr.TextArea(label="Transcript",
                                           placeholder="Write transcript here. (leave empty to use whisper)",
@@ -498,6 +510,11 @@ def main():
                     btn_mp.click(make_npz_prompt,
                                 inputs=[textbox_mp, upload_audio_prompt, record_audio_prompt, textbox_transcript],
                                 outputs=[text_output, prompt_output])
+            gr.Examples(examples=infer_from_audio_examples,
+                        inputs=[textbox, language_dropdown, accent_dropdown, upload_audio_prompt, record_audio_prompt, textbox_transcript],
+                        outputs=[text_output, audio_output],
+                        fn=infer_from_audio,
+                        cache_examples=False,)
         with gr.Tab("Make prompt"):
             gr.Markdown(make_prompt_md)
             with gr.Row():
@@ -518,6 +535,11 @@ def main():
                     btn_2.click(make_npz_prompt,
                               inputs=[textbox2, upload_audio_prompt_2, record_audio_prompt_2, textbox_transcript2],
                               outputs=[text_output_2, prompt_output_2])
+            gr.Examples(examples=make_npz_prompt_examples,
+                        inputs=[textbox2, upload_audio_prompt_2, record_audio_prompt_2, textbox_transcript2],
+                        outputs=[text_output_2, prompt_output_2],
+                        fn=make_npz_prompt,
+                        cache_examples=False,)
         with gr.Tab("Infer from prompt"):
             gr.Markdown(infer_from_prompt_md)
             with gr.Row():
@@ -538,6 +560,11 @@ def main():
                     btn_3.click(infer_from_prompt,
                               inputs=[textbox_3, language_dropdown_3, accent_dropdown_3, preset_dropdown_3, prompt_file],
                               outputs=[text_output_3, audio_output_3])
+            gr.Examples(examples=infer_from_prompt_examples,
+                        inputs=[textbox_3, language_dropdown_3, accent_dropdown_3, preset_dropdown_3, prompt_file],
+                        outputs=[text_output_3, audio_output_3],
+                        fn=infer_from_prompt,
+                        cache_examples=False,)
         with gr.Tab("Infer long text"):
             gr.Markdown("This is a long text generation demo. You can use this to generate long audio. ")
             with gr.Row():
@@ -559,6 +586,7 @@ def main():
                               inputs=[textbox_4, preset_dropdown_4, prompt_file_4, language_dropdown_4, accent_dropdown_4],
                               outputs=[text_output_4, audio_output_4])
 
+    webbrowser.open("http://127.0.0.1:7860")
     app.launch()
 
 if __name__ == "__main__":
